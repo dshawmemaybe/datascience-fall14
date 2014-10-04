@@ -1,0 +1,10 @@
+import avro.schema
+from avro.datafile import DataFileReader, DataFileWriter
+from avro.io import DatumReader, DatumWriter
+
+import pandas as pd
+import numpy as np
+
+data = avro.schema.parse(open("countries.avro").read())
+
+print data
