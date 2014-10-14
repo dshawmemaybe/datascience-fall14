@@ -1,26 +1,192 @@
 SQL Assignment Submission
 
 === 1
-<INSERT YOUR QUERY HERE>
+create view NumberOfMedals as
+       select c.name as country_name, count(c.name) as number_of_medals
+       from results r, players p, countries c
+       where r.player_id = p.player_id
+       and p.country_id = c.country_id
+       group by c.name
+       order by c.name;
 **************** RESULT ***************************************************************
-<INSERT YOUR RESULT HERE>
+               country_name               | number_of_medals 
+------------------------------------------+------------------
+ Algeria                                  |                4
+ Argentina                                |                1
+ Australia                                |               76
+ Austria                                  |                3
+ Barbados                                 |                1
+ Belarus                                  |                8
+ Brazil                                   |                9
+ Bulgaria                                 |                1
+ Cameroon                                 |                1
+ Canada                                   |                1
+ China                                    |                8
+ Costa Rica                               |                2
+ Croatia                                  |                1
+ Cuba                                     |               14
+ Czech Republic                           |                4
+ Denmark                                  |                3
+ Dominican Republic                       |                1
+ Eritrea                                  |                1
+ Estonia                                  |                2
+ Ethiopia                                 |               15
+ Finland                                  |                1
+ France                                   |               12
+ Germany                                  |               30
+ Greece                                   |                9
+ Hungary                                  |                4
+ Iceland                                  |                1
+ Ireland                                  |                1
+ Italy                                    |               16
+ Jamaica                                  |               29
+ Japan                                    |               21
+ Kazakhstan                               |                2
+ Kenya                                    |               14
+ Latvia                                   |                2
+ Lithuania                                |                3
+ Mexico                                   |                3
+ Morocco                                  |                7
+ Mozambique                               |                1
+ Netherlands                              |               27
+ Nigeria                                  |               13
+ Norway                                   |                3
+ Poland                                   |                9
+ Portugal                                 |                3
+ Romania                                  |               13
+ Russia                                   |               45
+ Saudi Arabia                             |                1
+ Slovakia                                 |                2
+ Slovenia                                 |                1
+ South Africa                             |               13
+ Spain                                    |                4
+ Sri Lanka                                |                1
+ Sweden                                   |               11
+ The Bahamas                              |                7
+ Trinidad and Tobago                      |                3
+ Turkey                                   |                1
+ Ukraine                                  |               13
+ United Kingdom                           |               15
+ United States                            |              171
+ Zimbabwe                                 |                3
 =============================================================================================
 
 === 2
-<INSERT YOUR QUERY HERE>
+a) select r.a, r.b, s.c, s.d 
+from r join s on r.c = s.c or (r.c is null and s.c is null);
+
+b) with aggregate as (
+   select r.a, r.b, r.c,  s.c as c2, s.d 
+   from r right outer join s on r.c = s.c
+   union
+   select r.a, r.b, r.c,  s.c as c2, s.d 
+   from r left outer join s on r.c = s.c
+   union
+   select r.a, r.b, r.c, s.c as c2, s.d 
+   from r join s on r.c = s.c or (r.c is null and s.c is null))
+   select a, b, c, d
+   from aggregate
+   where c = c2
+   or (c is null and c2 is null);
+   
 **************** RESULT ***************************************************************
-<INSERT YOUR RESULT HERE>
-=============================================================================================
+a)
+     a      | b  | c  |     d      
+------------+----+----+------------
+ a3         | 30 | 30 | d1        
+ a4         |  0 |    | d2  
+b)      
+     a      | b  | c  |     d      
+------------+----+----+------------
+ a3         | 30 | 30 | d1        
+ a4         |  0 |    | d2        
+ a4         |  0 |    | 
+            |    |    | d2    
 
 === 3
-<INSERT YOUR QUERY HERE>
+create function trigger_function() 
+       returns trigger as $$
+declare
+	is_team integer;
+	new_country_id varchar;
+begin
+	select is_team_event into is_team from events where NEW.event_id = 			events.event_id; 
+	select country_id into new_country_id from players where players.player_id = NEW.player_id;
+	if is_team = 1 then
+	   insert into teammedals (country_id, event_id, medal, result) values (new_country_id, NEW.event_id, NEW.medal, NEW.result);	
+	   end if;
+	return null;
+end
+$$
+language 'plpgsql';
+
+create trigger update_team_medals
+	after insert 
+	on results
+	for each row
+	execute procedure trigger_function();
 **************** RESULT ***************************************************************
-<INSERT YOUR RESULT HERE>
+select * from teammedals where event_id = 'E100';
+ country_id | event_id |  medal  | result 
+------------+----------+---------+--------
+ JAM        | E100     | SILVER  | 203.25
+ RUS        | E100     | BRONZE  | 203.46
+ USA        | E100     | GOLD    | 202.62
+
+
+insert into results values ('E100', 'GREENMAU01', 'SILVER', 12.34);
+INSERT 0 1
+
+select * from teammedals where event_id = 'E100';
+ country_id | event_id |  medal  | result 
+------------+----------+---------+--------
+ JAM        | E100     | SILVER  | 203.25
+ RUS        | E100     | BRONZE  | 203.46
+ USA        | E100     | GOLD    | 202.62
+ USA        | E100     | SILVER  |  12.34
+
+
+
 =============================================================================================
 
 === 4
-<INSERT YOUR QUERY HERE>
+create function gold_medal_list() 
+       returns text as $$ 
+	declare 
+		strresult text;
+		curs cursor for select events.name eventname, players.name playername from results join players on results.player_id = players.player_id join events on results.event_id = events.event_id where events.olympic_id = 'ATH2004' and medal = 'GOLD' and players.country_id = 'USA';
+
+	begin
+		strresult := '';
+		for rec 
+		in curs	
+		loop
+			strresult := strresult || '<medal>' || chr(10);
+			strresult := strresult || chr(9) || '<event>' || rec.eventname || '</event>' || chr(10);
+			strresult := strresult || chr(9) || '<player>' || rec.playername || '</player>' || chr(10);
+			strresult := strresult || '</medal>' || chr(10);
+		end loop;
+
+		return strresult;
+		close curs;
+	end $$ 
+language 'plpgsql';
 **************** RESULT ***************************************************************
-<INSERT YOUR RESULT HERE>
+first few lines:
+                   gold_medal_list                   
+-----------------------------------------------------
+ <medal>                                            +
+         <event>100m Men</event>                    +
+         <player>Justin Gatlin</player>             +
+ </medal>                                           +
+ <medal>                                            +
+         <event>200m Men</event>                    +
+         <player>Shawn Crawford</player>            +
+ </medal>                                           +
+ <medal>                                            +
+         <event>400m Men</event>                    +
+         <player>Jeremy Wariner</player>            +
+ </medal>                                           +
+
 =============================================================================================
 
