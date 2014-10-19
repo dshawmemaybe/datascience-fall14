@@ -26,4 +26,6 @@ for line in cmsc:
     elif b.match(line):
         matchgroup = b.match(line)
         info += ", " + matchgroup.group(1) + ", " + matchgroup.group(2)
+    else:
+        info += ", " + n.match(line).group()
     
