@@ -8,6 +8,7 @@ c = re.compile('.*{{fb\|([A-Z]+)}}.*')
 y = re.compile('.*Cup\|([0-9]+).*')
 
 country = ""
+
 for line in data:
     split = line.split(',')
     for year in split:
