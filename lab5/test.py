@@ -1,0 +1,2 @@
+import nltk
+print(nltk.corpus.ieer.parsed_docs('NYT_19980315')[1].text)
