@@ -1,0 +1,1 @@
+For my product_dedup.py I decided to use the title, price, and manufacturer fields and using exact comparisons for the comparator. 

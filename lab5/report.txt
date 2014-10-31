@@ -1,0 +1,3 @@
+For my product_dedup.py I decided to use the title, price, and manufacturer fields and using exact comparisons for the comparator. 
+
+My evaluation script creates a dictionary from the correct product_mapping.csv and then goes through the products_out and then compares if the two matches found in the product_out correspond to two actual values from the truth product_mapping.csv. I found that 125/274 of the valid pairs were correct.

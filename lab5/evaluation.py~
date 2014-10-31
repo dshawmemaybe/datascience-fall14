@@ -1,0 +1,6 @@
+import re
+
+a = open('products_out.csv','r')
+b = open('products_mapping.csv','r')
+
+print a
